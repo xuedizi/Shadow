@@ -94,11 +94,6 @@ object LoadPluginBloc {
                 packageArchiveInfo
             })
 
-            val buildPluginInfo = executorService.submit(Callable {
-                val packageInfo = getPackageInfo.get()
-                ParsePluginApkBloc.parse(packageInfo, loadParameters, hostAppContext)
-            })
-
             val buildPackageManager = executorService.submit(Callable {
                 val packageInfo = getPackageInfo.get()
                 val hostPackageManager = hostAppContext.packageManager
@@ -108,6 +103,17 @@ object LoadPluginBloc {
             val buildResources = executorService.submit(Callable {
                 val packageInfo = getPackageInfo.get()
                 CreateResourceBloc.create(packageInfo, installedApk.apkFilePath, hostAppContext)
+            })
+
+            val buildManifestInfo = executorService.submit(Callable {
+              val resources = buildResources.get()
+              ParseManifestBloc.parse(resources)
+            })
+
+            val buildPluginInfo = executorService.submit(Callable {
+              val packageInfo = getPackageInfo.get()
+              val manifestInfo = buildManifestInfo.get()
+              ParsePluginApkBloc.parse(packageInfo, manifestInfo,loadParameters, hostAppContext)
             })
 
             val buildAppComponentFactory = executorService.submit(Callable<ShadowAppComponentFactory> {

@@ -257,6 +257,10 @@ abstract class ComponentManager : PluginComponentLauncher {
 
     class BroadcastInfo(val className: String, val actions: Array<String>)
 
+    /**
+     * 此逻辑通过ManifestInfo信息代替
+     *
+     */
     fun getBroadcastsByPartKey(partKey: String): MutableMap<String, List<String>> {
         if (application2broadcastInfo[partKey] == null) {
             application2broadcastInfo[partKey] = HashMap()

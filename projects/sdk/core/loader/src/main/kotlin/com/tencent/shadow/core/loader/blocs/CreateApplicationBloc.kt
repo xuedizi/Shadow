@@ -52,7 +52,9 @@ object CreateApplicationBloc {
             shadowApplication.setPluginResources(resources)
             shadowApplication.setPluginClassLoader(pluginClassLoader)
             shadowApplication.setPluginComponentLauncher(componentManager)
-            shadowApplication.setBroadcasts(componentManager.getBroadcastsByPartKey(partKey))
+            shadowApplication.setBroadcasts(pluginInfo.mReceivers.map { receiveInfo ->
+              receiveInfo.className!! to receiveInfo.actions
+            }.toMap())
             shadowApplication.setAppComponentFactory(appComponentFactory)
             shadowApplication.applicationInfo = applicationInfo
             shadowApplication.setBusinessName(pluginInfo.businessName)
