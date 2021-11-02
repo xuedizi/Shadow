@@ -1,7 +1,9 @@
 package com.tencent.shadow.core.loader.blocs
 
+import android.content.Context
 import android.content.IntentFilter
 import android.content.res.Resources
+import com.tencent.shadow.core.common.InstalledApk
 import com.tencent.shadow.core.loader.infos.ManifestInfo
 import com.tencent.shadow.core.loader.infos.ManifestInfo.Receiver
 import com.tencent.shadow.core.loader.infos.ManifestInfo.ReceiverIntentInfo
@@ -23,7 +25,8 @@ object ParseManifestBloc {
   private const val ATTR_NAME = "name"
 
   @Throws(Exception::class)
-  fun parse(resources: Resources): ManifestInfo = ManifestInfo().apply {
+  fun parse(context: Context, installedApk: InstalledApk): ManifestInfo = ManifestInfo().apply {
+    val resources: Resources = newResource(context, installedApk)
     val parser = resources.assets.openXmlResourceParser("AndroidManifest.xml")
     val outerDepth = parser.depth
     var type: Int
@@ -34,6 +37,18 @@ object ParseManifestBloc {
         parseBroadcastReceiver(parser, this)
       }
     }
+  }
+
+  /**
+   * 此处如果使用[LoadPluginBloc.loadPlugin]构建的resources,将包含WebView的resources,故需要重新创建
+   */
+  private fun newResource(context: Context, installedApk: InstalledApk): Resources {
+    val packageArchiveInfo =
+      context.packageManager.getPackageArchiveInfo(installedApk.apkFilePath, 0)!!
+    val packageManager = context.packageManager
+    packageArchiveInfo.applicationInfo?.publicSourceDir = installedApk.apkFilePath
+    packageArchiveInfo.applicationInfo?.sourceDir = installedApk.apkFilePath
+    return packageManager.getResourcesForApplication(packageArchiveInfo.applicationInfo)
   }
 
   private fun parseBroadcastReceiver(parser: XmlPullParser, manifestInfo: ManifestInfo) {
