@@ -186,6 +186,11 @@ abstract class ComponentManager : PluginComponentLauncher {
             val componentName = ComponentName(pluginInfo.packageName, it.className!!)
             mPluginContentProviderManager!!.addContentProviderInfo(pluginInfo.partKey,it,onBindContainerContentProvider(componentName))
         }
+
+        pluginInfo.mReceivers.forEach {
+            val componentName = ComponentName(pluginInfo.packageName,it.className!!)
+            common(it,componentName)
+        }
     }
 
     fun getComponentBusinessName(componentName: ComponentName): String? {
